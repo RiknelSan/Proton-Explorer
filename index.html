@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proton Explorer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container" id="appContainer">
+
+        <!-- Sidebar: Places / Bookmarks / Devices (like Nautilus) -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-scroll">
+                <ul class="sidebar-list" id="placesList"></ul>
+
+                <div id="bookmarksSection">
+                    <div class="sidebar-header">Bookmarks</div>
+                    <ul class="sidebar-list" id="favoritesList"></ul>
+                </div>
+
+                <div class="sidebar-header">Devices</div>
+                <ul class="sidebar-list" id="devicesList"></ul>
+            </div>
+            <button id="addFavoriteBtn" class="sidebar-add-btn" title="Bookmark the current folder"><span class="ico" data-icon="plus"></span><span>Add Bookmark</span></button>
+        </aside>
+
+        <div class="main-area">
+            <!-- Header bar -->
+            <header class="headerbar global-toolbar">
+                <div class="hb-left">
+                    <button id="toggleSidebarBtn" class="icon-btn" title="Toggle sidebar (F9)"><span class="ico" data-icon="menu"></span></button>
+                    <button id="newFolderBtn" class="icon-btn" title="New folder (Ctrl+Shift+N)"><span class="ico" data-icon="newfolder"></span><span class="btn-text">New Folder</span></button>
+                    <button id="topMoveToBtn" class="btn btn-primary" style="display: none;">Move To</button>
+                </div>
+
+                <div class="hb-right">
+                    <button id="openExplorerBtn" class="icon-btn" title="Open current folder in the system file manager"><span class="ico" data-icon="external"></span></button>
+                    <button id="toggleSplitViewBtn" class="icon-btn" title="Dual pane (F3)"><span class="ico" data-icon="split"></span></button>
+
+                    <!-- View options -->
+                    <div class="popover-wrap">
+                        <button id="viewBtn" class="icon-btn popover-toggle" title="View options"><span class="ico" data-icon="view"></span><span class="ico caret" data-icon="caret"></span></button>
+                        <div id="viewMenu" class="popover">
+                            <div class="pop-title">Sort</div>
+                            <select id="sortSelect">
+                                <option value="date-desc">Newest First</option>
+                                <option value="date-asc">Oldest First</option>
+                                <option value="name-asc">Name (A-Z)</option>
+                                <option value="name-desc">Name (Z-A)</option>
+                                <option value="size-desc">Size (Large to Small)</option>
+                                <option value="size-asc">Size (Small to Large)</option>
+                            </select>
+                            <div class="pop-row"><label for="zoomSlider">Icon Size</label><input type="range" id="zoomSlider" min="100" max="400" value="200"></div>
+                            <div class="pop-row"><label for="limitSelect">Items per Page</label>
+                                <select id="limitSelect">
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                    <option value="200">200</option>
+                                </select>
+                            </div>
+                            <div class="pop-row"><label for="showHiddenToggle">Show Hidden Files</label>
+                                <label class="switch"><input type="checkbox" id="showHiddenToggle"><span class="slider round"></span></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings Sub Menu -->
+                    <div class="popover-wrap settings-dropdown">
+                        <button id="settingsBtn" class="icon-btn popover-toggle" title="Menu"><span class="ico" data-icon="more"></span></button>
+                        <div id="settingsMenu" class="popover">
+                            <div class="pop-row">
+                                <label for="themeColorPicker">Accent Color</label>
+                                <input type="color" id="themeColorPicker">
+                            </div>
+                            <div class="pop-row">
+                                <label for="hoverToggle">Hover Preview</label>
+                                <!-- FIX: Changed div to label so the slider triggers the checkbox -->
+                                <label class="switch"><input type="checkbox" id="hoverToggle"><span class="slider round"></span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="split-container" id="splitContainer">
+                <section class="pane active" id="pane1">
+                    <div class="pane-header">
+                        <div class="nav-group">
+                            <button class="icon-btn" data-pane="pane1" data-nav="back" title="Back (Alt+Left)"><span class="ico" data-icon="back"></span></button>
+                            <button class="icon-btn" data-pane="pane1" data-nav="forward" title="Forward (Alt+Right)"><span class="ico" data-icon="forward"></span></button>
+                        </div>
+                        <button class="icon-btn" data-pane="pane1" data-nav="up" title="Parent folder (Alt+Up)"><span class="ico" data-icon="up"></span></button>
+                        <div class="pathbar" id="pathbar-pane1" title="Click to type a path (Ctrl+L)">
+                            <div class="breadcrumb" id="breadcrumb-pane1"></div>
+                            <input class="path-input" id="pathInput-pane1" type="text" spellcheck="false" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="pane-content" id="paneContent-pane1">
+                        <div id="imageGrid-pane1" class="grid"></div>
+                        <div id="emptyState-pane1" class="empty-state"><span class="ico" data-icon="folder"></span><div>Folder is Empty</div></div>
+                        <div id="pagination-pane1" class="pagination"></div>
+                    </div>
+                    <div class="pane-status" id="status-pane1"></div>
+                </section>
+
+                <section class="pane hidden" id="pane2">
+                    <div class="pane-header">
+                        <div class="nav-group">
+                            <button class="icon-btn" data-pane="pane2" data-nav="back" title="Back (Alt+Left)"><span class="ico" data-icon="back"></span></button>
+                            <button class="icon-btn" data-pane="pane2" data-nav="forward" title="Forward (Alt+Right)"><span class="ico" data-icon="forward"></span></button>
+                        </div>
+                        <button class="icon-btn" data-pane="pane2" data-nav="up" title="Parent folder (Alt+Up)"><span class="ico" data-icon="up"></span></button>
+                        <div class="pathbar" id="pathbar-pane2" title="Click to type a path (Ctrl+L)">
+                            <div class="breadcrumb" id="breadcrumb-pane2"></div>
+                            <input class="path-input" id="pathInput-pane2" type="text" spellcheck="false" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="pane-content" id="paneContent-pane2">
+                        <div id="imageGrid-pane2" class="grid"></div>
+                        <div id="emptyState-pane2" class="empty-state"><span class="ico" data-icon="folder"></span><div>Folder is Empty</div></div>
+                        <div id="pagination-pane2" class="pagination"></div>
+                    </div>
+                    <div class="pane-status" id="status-pane2"></div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dynamic Hover Preview Box -->
+    <div id="hoverPreviewBox" class="hover-preview-box">
+        <img id="hoverImg" src="" style="display:none;">
+        <video id="hoverVid" muted loop style="display:none;"></video>
+    </div>
+
+    <!-- Hidden native copy/paste indicator -->
+    <div id="clipboardStatus" class="clipboard-status"></div>
+
+    <div id="selectionBox" class="selection-box"></div>
+    <div id="actionBar" class="action-bar">
+        <span id="selectionCount">1 item selected</span>
+        <button id="batchRenameBtn" class="btn btn-secondary">Rename</button>
+        <button id="batchDeleteBtn" class="btn btn-danger">Delete</button>
+        <button id="clearSelectionBtn" class="btn">Clear</button>
+    </div>
+
+    <div id="contextMenu" class="context-menu">
+        <button id="ctxOpenBtn">Open</button>
+        <button id="ctxOpenDefaultBtn">Open with default app</button>
+        <button id="ctxShowBtn">Show in file manager</button>
+        <div class="menu-sep"></div>
+        <button id="ctxCutBtn">Cut</button>
+        <button id="ctxCopyBtn">Copy</button>
+        <button id="ctxPasteBtn">Paste here</button>
+        <div class="menu-sep"></div>
+        <button id="ctxMoveToBtn">Move To...</button>
+        <button id="ctxRenameBtn">Rename</button>
+        <div class="menu-sep"></div>
+        <button id="ctxDeleteBtn" class="danger">Delete</button>
+    </div>
+
+    <div id="moveModal" class="dialog-modal">
+        <div class="dialog-content">
+            <h3 style="margin: 0; font-size: 18px;">Move To...</h3>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <select class="drive-select" id="drive-moveModal"></select>
+                <div id="moveBreadcrumb" class="breadcrumb" style="font-size: 14px; flex-wrap: wrap;"></div>
+            </div>
+            <div id="moveFolderList" class="folder-list"></div>
+            <div class="dialog-actions">
+                <button id="moveNewFolderBtn" class="btn btn-secondary">+ New Folder</button>
+                <div class="right-btns">
+                    <button id="cancelMoveBtn" class="btn btn-secondary">Cancel</button>
+                    <button id="confirmMoveBtn" class="btn btn-primary">Move Here</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal" class="modal">
+        <button id="prevBtn" class="nav-btn">&#10094;</button>
+        <div class="modal-content">
+            <div class="image-wrapper">
+                <img id="modalImg" src="" alt="Selected Media" style="display: none;">
+                <video id="modalVid" controls loop style="display: none; max-width: 100%; max-height: 75vh; border-radius: 6px;"></video>
+                <!-- Shown when the video codec/container cannot be decoded by the app -->
+                <div id="modalUnsupported" class="unsupported-panel" style="display: none;">
+                    <span class="ico" data-icon="warning"></span>
+                    <h3>Codec not supported</h3>
+                    <p>This video uses a codec or container that can't be played inside the app.</p>
+                    <button id="modalOpenExternalBtn" class="btn btn-primary">Open with default player</button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="closeBtn" class="btn btn-secondary">Close</button>
+            </div>
+        </div>
+        <button id="nextBtn" class="nav-btn">&#10095;</button>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>
